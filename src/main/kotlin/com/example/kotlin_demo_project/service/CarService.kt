@@ -2,6 +2,7 @@ package com.example.kotlin_demo_project.service
 
 import com.example.kotlin_demo_project.models.Car
 import com.example.kotlin_demo_project.repositories.CarRepository
+import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 
 @Service
@@ -14,6 +15,26 @@ class CarService(private val carRepository: CarRepository) {
     fun findByLicensePlate(licensePlate: String): Car? = carRepository.findByLicensePlate(licensePlate)
 
     fun save(car: Car): Car = carRepository.save(car)
+
+    @Transactional
+    fun update(id: Long, car: Car): Car? {
+        val existingCar = carRepository.findById(id).orElse(null) ?: return null
+
+        val updatedCar = existingCar.copy(
+            licensePlate = car.licensePlate,
+            brand = car.brand,
+            model = car.model,
+            year = car.year,
+            mileage = car.mileage,
+            status = car.status,
+            rentalAgency = car.rentalAgency,
+            category = car.category
+        )
+
+        // Save the updated car back to the database
+        return carRepository.save(existingCar)
+    }
+
 
     fun deleteById(id: Long) = carRepository.deleteById(id)
 }
