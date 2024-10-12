@@ -1,5 +1,7 @@
 package com.example.kotlin_demo_project.controllers
 
+import com.example.kotlin_demo_project.DTO.CustomerCreateDTO
+import com.example.kotlin_demo_project.DTO.CustomerDTO
 import com.example.kotlin_demo_project.models.Customer
 import com.example.kotlin_demo_project.service.CustomerService
 import org.springframework.http.ResponseEntity
@@ -10,20 +12,21 @@ import org.springframework.web.bind.annotation.*
 class CustomerController(private val customerService: CustomerService) {
 
     @GetMapping
-    fun getAllCustomers(): List<Customer> = customerService.findAll()
+    fun getAllCustomers(): List<CustomerDTO> = customerService.findAll()
 
     @GetMapping("/{id}")
-    fun getCustomerById(@PathVariable id: Long): ResponseEntity<Customer> {
+    fun getCustomerById(@PathVariable id: Long): ResponseEntity<CustomerDTO> {
         val customer = customerService.findById(id)
         return customer?.let { ResponseEntity.ok(it) } ?: ResponseEntity.notFound().build()
     }
 
     @PostMapping
-    fun createCustomer(@RequestBody customer: Customer): Customer = customerService.save(customer)
+    fun createCustomer(@RequestBody customerCreateDTO: CustomerCreateDTO): CustomerDTO =
+        customerService.save(customerCreateDTO)
 
     @PutMapping("/{id}")
-    fun updateCustomer(@PathVariable id: Long, @RequestBody customer: Customer): ResponseEntity<Customer> {
-        val updatedCustomer = customerService.update(id, customer)
+    fun updateCustomer(@PathVariable id: Long, @RequestBody customerCreateDTO: CustomerCreateDTO): ResponseEntity<CustomerDTO> {
+        val updatedCustomer = customerService.update(id, customerCreateDTO)
         return updatedCustomer?.let { ResponseEntity.ok(it) } ?: ResponseEntity.notFound().build()
     }
 

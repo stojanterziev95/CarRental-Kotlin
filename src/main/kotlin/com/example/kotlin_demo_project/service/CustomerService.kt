@@ -1,37 +1,44 @@
 package com.example.kotlin_demo_project.service
 
+import com.example.kotlin_demo_project.DTO.CustomerCreateDTO
+import com.example.kotlin_demo_project.DTO.CustomerDTO
+import com.example.kotlin_demo_project.MapperInterface.CustomerMapper
 import com.example.kotlin_demo_project.models.Customer
 import com.example.kotlin_demo_project.repositories.CustomerRepository
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 
 @Service
-class CustomerService(private val customerRepository: CustomerRepository) {
+class CustomerService(
+    private val customerRepository: CustomerRepository,
+    private val customerMapper: CustomerMapper
+) {
 
-    fun findAll(): List<Customer> = customerRepository.findAll()
+    fun findAll(): List<CustomerDTO> =
+        customerRepository.findAll().map { customerMapper.toDTO(it) }
 
-    fun findById(id: Long): Customer? = customerRepository.findById(id).orElse(null)
+    fun findById(id: Long): CustomerDTO? =
+        customerRepository.findById(id).map { customerMapper.toDTO(it) }.orElse(null)
 
-    fun findByEmail(email: String): Customer? = customerRepository.findByEmail(email)
+    fun findByEmail(email: String): CustomerDTO? =
+        customerRepository.findByEmail(email)?.let { customerMapper.toDTO(it) }
 
-    fun save(customer: Customer): Customer = customerRepository.save(customer)
+    fun save(customerCreateDTO: CustomerCreateDTO): CustomerDTO {
+        val customer = customerMapper.toModel(customerCreateDTO)
+        return customerMapper.toDTO(customerRepository.save(customer))
+    }
 
     @Transactional
-    fun update(id: Long, customer: Customer): Customer? {
-        // Fetch the existing customer from the database
+    fun update(id: Long, customerCreateDTO: CustomerCreateDTO): CustomerDTO? {
         val existingCustomer = customerRepository.findById(id).orElse(null) ?: return null
 
-        // Create a modified copy of the existing customer
         val updatedCustomer = existingCustomer.copy(
-            name = customer.name,
-            email = customer.email,
-            phoneNumber = customer.phoneNumber,
-            // You might not want to copy rentals and reservations here as they can lead to issues.
-            // Consider handling them separately if needed.
+            name = customerCreateDTO.name,
+            email = customerCreateDTO.email,
+            phoneNumber = customerCreateDTO.phoneNumber
         )
 
-        // Save the updated customer back to the database
-        return customerRepository.save(updatedCustomer)
+        return customerMapper.toDTO(customerRepository.save(updatedCustomer))
     }
 
     fun deleteById(id: Long) = customerRepository.deleteById(id)

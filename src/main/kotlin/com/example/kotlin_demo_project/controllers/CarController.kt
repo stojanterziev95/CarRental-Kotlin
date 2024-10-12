@@ -1,6 +1,7 @@
 package com.example.kotlin_demo_project.controllers
 
-import com.example.kotlin_demo_project.models.Car
+import com.example.kotlin_demo_project.DTO.CarDTO
+import com.example.kotlin_demo_project.DTO.CreateCarDTO
 import com.example.kotlin_demo_project.service.CarService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -10,20 +11,20 @@ import org.springframework.web.bind.annotation.*
 class CarController(private val carService: CarService) {
 
     @GetMapping
-    fun getAllCars(): List<Car> = carService.findAll()
+    fun getAllCars(): List<CarDTO> = carService.findAll()
 
     @GetMapping("/{id}")
-    fun getCarById(@PathVariable id: Long): ResponseEntity<Car> {
+    fun getCarById(@PathVariable id: Long): ResponseEntity<CarDTO> {
         val car = carService.findById(id)
         return car?.let { ResponseEntity.ok(it) } ?: ResponseEntity.notFound().build()
     }
 
     @PostMapping
-    fun createCar(@RequestBody car: Car): Car = carService.save(car)
+    fun createCar(@RequestBody carCreateDTO: CreateCarDTO): CarDTO = carService.save(carCreateDTO)
 
     @PutMapping("/{id}")
-    fun updateCar(@PathVariable id: Long, @RequestBody car: Car): ResponseEntity<Car> {
-        val updatedCar = carService.update(id, car)
+    fun updateCar(@PathVariable id: Long, @RequestBody carCreateDTO: CreateCarDTO): ResponseEntity<CarDTO> {
+        val updatedCar = carService.update(id, carCreateDTO)
         return updatedCar?.let { ResponseEntity.ok(it) } ?: ResponseEntity.notFound().build()
     }
 

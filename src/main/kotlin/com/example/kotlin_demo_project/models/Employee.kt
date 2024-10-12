@@ -17,5 +17,5 @@ data class Employee(
 
     @ManyToOne
     @JoinColumn(name = "rental_agency_id")
-    val rentalAgency: RentalAgency
+    var rentalAgency: RentalAgency
 )

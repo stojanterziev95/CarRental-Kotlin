@@ -1,41 +1,47 @@
 package com.example.kotlin_demo_project.service
 
+import com.example.kotlin_demo_project.DTO.CarDTO
+import com.example.kotlin_demo_project.DTO.CreateCarDTO
+import com.example.kotlin_demo_project.MapperInterface.CarMapper
 import com.example.kotlin_demo_project.models.Car
 import com.example.kotlin_demo_project.repositories.CarRepository
+import com.example.kotlin_demo_project.repositories.CategoryRepository
+import com.example.kotlin_demo_project.repositories.RentalAgencyRepository
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 
 @Service
-class CarService(private val carRepository: CarRepository) {
+class CarService(
+    private val carRepository: CarRepository,
+    private val rentalAgencyRepository: RentalAgencyRepository,
+    private val categoryRepository: CategoryRepository
+) {
+    private val carMapper = CarMapper.INSTANCE
 
-    fun findAll(): List<Car> = carRepository.findAll()
+    fun findAll(): List<CarDTO> = carRepository.findAll().map(carMapper::toCarDTO)
 
-    fun findById(id: Long): Car? = carRepository.findById(id).orElse(null)
+    fun findById(id: Long): CarDTO? = carRepository.findById(id)
+        .map(carMapper::toCarDTO)
+        .orElse(null)
 
-    fun findByLicensePlate(licensePlate: String): Car? = carRepository.findByLicensePlate(licensePlate)
-
-    fun save(car: Car): Car = carRepository.save(car)
-
-    @Transactional
-    fun update(id: Long, car: Car): Car? {
-        val existingCar = carRepository.findById(id).orElse(null) ?: return null
-
-        val updatedCar = existingCar.copy(
-            licensePlate = car.licensePlate,
-            brand = car.brand,
-            model = car.model,
-            manufactureYear = car.manufactureYear,
-            mileage = car.mileage,
-            status = car.status,
-            rentalAgency = car.rentalAgency,
-            category = car.category,
-            rentals = existingCar.rentals  // Maintain the existing rentals
-        )
-
-        // Save the updated car back to the database
-        return carRepository.save(updatedCar)
+    fun save(carCreateDTO: CreateCarDTO): CarDTO {
+        val car = carMapper.toCar(carCreateDTO)
+        car.rentalAgency = rentalAgencyRepository.findById(carCreateDTO.rentalAgencyId)
+            .orElseThrow { IllegalArgumentException("Rental agency not found") }
+        car.category = categoryRepository.findById(carCreateDTO.categoryId)
+            .orElseThrow { IllegalArgumentException("Category not found") }
+        return carMapper.toCarDTO(carRepository.save(car))
     }
 
+    fun update(id: Long, carCreateDTO: CreateCarDTO): CarDTO? {
+        val existingCar = carRepository.findById(id).orElse(null) ?: return null
+        val updatedCar = carMapper.toCar(carCreateDTO).copy(id = existingCar.id)
+        updatedCar.rentalAgency = rentalAgencyRepository.findById(carCreateDTO.rentalAgencyId)
+            .orElseThrow { IllegalArgumentException("Rental agency not found") }
+        updatedCar.category = categoryRepository.findById(carCreateDTO.categoryId)
+            .orElseThrow { IllegalArgumentException("Category not found") }
+        return carMapper.toCarDTO(carRepository.save(updatedCar))
+    }
 
     fun deleteById(id: Long) = carRepository.deleteById(id)
 }

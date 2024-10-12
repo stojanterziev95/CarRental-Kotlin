@@ -1,5 +1,7 @@
 package com.example.kotlin_demo_project.controllers
 
+import com.example.kotlin_demo_project.DTO.CreateEmployeeDTO
+import com.example.kotlin_demo_project.DTO.EmployeeDTO
 import com.example.kotlin_demo_project.models.Employee
 import com.example.kotlin_demo_project.service.EmployeeService
 import org.springframework.http.ResponseEntity
@@ -10,20 +12,24 @@ import org.springframework.web.bind.annotation.*
 class EmployeeController(private val employeeService: EmployeeService) {
 
     @GetMapping
-    fun getAllEmployees(): List<Employee> = employeeService.findAll()
+    fun getAllEmployees(): List<EmployeeDTO> = employeeService.findAll()
 
     @GetMapping("/{id}")
-    fun getEmployeeById(@PathVariable id: Long): ResponseEntity<Employee> {
+    fun getEmployeeById(@PathVariable id: Long): ResponseEntity<EmployeeDTO> {
         val employee = employeeService.findById(id)
         return employee?.let { ResponseEntity.ok(it) } ?: ResponseEntity.notFound().build()
     }
 
     @PostMapping
-    fun createEmployee(@RequestBody employee: Employee): Employee = employeeService.save(employee)
+    fun createEmployee(@RequestBody createEmployeeDTO: CreateEmployeeDTO): EmployeeDTO =
+        employeeService.save(createEmployeeDTO)
 
     @PutMapping("/{id}")
-    fun updateEmployee(@PathVariable id: Long, @RequestBody employee: Employee): ResponseEntity<Employee> {
-        val updatedEmployee = employeeService.update(id, employee)
+    fun updateEmployee(
+        @PathVariable id: Long,
+        @RequestBody createEmployeeDTO: CreateEmployeeDTO
+    ): ResponseEntity<EmployeeDTO> {
+        val updatedEmployee = employeeService.update(id, createEmployeeDTO)
         return updatedEmployee?.let { ResponseEntity.ok(it) } ?: ResponseEntity.notFound().build()
     }
 

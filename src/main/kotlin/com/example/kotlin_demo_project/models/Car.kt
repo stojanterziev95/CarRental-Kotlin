@@ -32,11 +32,11 @@ data class Car(
 
     @ManyToOne
     @JoinColumn(name = "rental_agency_id")
-    val rentalAgency: RentalAgency,
+    var rentalAgency: RentalAgency,
 
     @ManyToOne
     @JoinColumn(name = "category_id")
-    val category: Category,  // New relationship to Category
+    var category: Category,  // New relationship to Category
 
     @OneToMany(mappedBy = "car", cascade = [CascadeType.ALL])
     val rentals: List<Rental> = emptyList()
