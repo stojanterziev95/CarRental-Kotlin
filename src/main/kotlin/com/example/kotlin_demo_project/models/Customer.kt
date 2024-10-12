@@ -23,8 +23,4 @@ data class Customer(
 
     @OneToMany(mappedBy = "customer", cascade = [CascadeType.ALL])
     val reservations: List<Reservation> = emptyList()
-) {
-    constructor() : this() {
-
-    }
-}
+)

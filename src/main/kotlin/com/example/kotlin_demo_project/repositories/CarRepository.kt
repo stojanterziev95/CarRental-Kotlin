@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository
 @Repository
 interface CarRepository : JpaRepository<Car, Long> {
     fun findByLicensePlate(licensePlate: String): Car?
-    fun findAvailableCars(): List<Car>
+    //fun findAvailableCars(): List<Car>
 }

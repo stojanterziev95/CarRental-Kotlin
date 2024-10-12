@@ -19,8 +19,4 @@ data class Category(
 
     @OneToMany(mappedBy = "category", cascade = [CascadeType.ALL])
     val cars: List<Car> = emptyList()
-) {
-    constructor() : this() {
-
-    }
-}
+)

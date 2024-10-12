@@ -24,15 +24,16 @@ class CarService(private val carRepository: CarRepository) {
             licensePlate = car.licensePlate,
             brand = car.brand,
             model = car.model,
-            year = car.year,
+            manufactureYear = car.manufactureYear,
             mileage = car.mileage,
             status = car.status,
             rentalAgency = car.rentalAgency,
-            category = car.category
+            category = car.category,
+            rentals = existingCar.rentals  // Maintain the existing rentals
         )
 
         // Save the updated car back to the database
-        return carRepository.save(existingCar)
+        return carRepository.save(updatedCar)
     }
 
 

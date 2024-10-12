@@ -20,8 +20,8 @@ data class Car(
     @Column(nullable = false)
     val model: String,
 
-    @Column(nullable = false)
-    val year: Int,
+    @Column(name = "manufacture_year", nullable = false)
+    val manufactureYear: Int,
 
     @Column(nullable = false)
     val mileage: Int,
@@ -40,8 +40,4 @@ data class Car(
 
     @OneToMany(mappedBy = "car", cascade = [CascadeType.ALL])
     val rentals: List<Rental> = emptyList()
-) {
-    constructor() : this() {
-
-    }
-}
+)
