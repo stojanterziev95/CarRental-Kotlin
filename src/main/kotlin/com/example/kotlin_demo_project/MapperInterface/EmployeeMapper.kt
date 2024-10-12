@@ -13,7 +13,7 @@ interface EmployeeMapper {
         val INSTANCE: EmployeeMapper = Mappers.getMapper(EmployeeMapper::class.java)
     }
 
-    @Mapping(source = "rentalAgency.name", target = "rentalAgencyName")
+    @Mapping(source = "rentalAgency.name", target = "rentalAgencyId")
     fun toEmployeeDTO(employee: Employee): EmployeeDTO
 
     @Mapping(target = "id", ignore = true)

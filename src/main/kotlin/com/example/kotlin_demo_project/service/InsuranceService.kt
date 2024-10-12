@@ -1,29 +1,47 @@
 package com.example.kotlin_demo_project.service
 
+import com.example.kotlin_demo_project.DTO.InsuranceCreateDTO
+import com.example.kotlin_demo_project.DTO.InsuranceDTO
+import com.example.kotlin_demo_project.MapperInterface.InsuranceMapper
 import com.example.kotlin_demo_project.models.Insurance
 import com.example.kotlin_demo_project.repositories.InsuranceRepository
+import com.example.kotlin_demo_project.repositories.RentalRepository
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 
 @Service
 class InsuranceService(
-    private val insuranceRepository: InsuranceRepository
+    private val insuranceRepository: InsuranceRepository,
+    private val rentalRepository: RentalRepository,
+    private val insuranceMapper: InsuranceMapper
 ) {
-    fun findAll(): List<Insurance> = insuranceRepository.findAll()
+    fun findAll(): List<InsuranceDTO> =
+        insuranceRepository.findAll().map { insuranceMapper.toInsuranceDTO(it) }
 
-    fun findById(id: Long): Insurance? = insuranceRepository.findById(id).orElse(null)
+    fun findById(id: Long): InsuranceDTO? =
+        insuranceRepository.findById(id).orElse(null)?.let { insuranceMapper.toInsuranceDTO(it) }
 
-    fun save(insurance: Insurance): Insurance = insuranceRepository.save(insurance)
+    fun save(insuranceCreateDTO: InsuranceCreateDTO): InsuranceDTO {
+        val rental = rentalRepository.findById(insuranceCreateDTO.rentalId)
+            .orElseThrow { IllegalArgumentException("Rental not found") }
+        val insurance = insuranceMapper.toInsurance(insuranceCreateDTO, rental)
+        val savedInsurance = insuranceRepository.save(insurance)
+        return insuranceMapper.toInsuranceDTO(savedInsurance)
+    }
 
     @Transactional
-    fun update(id: Long, insurance: Insurance): Insurance? {
+    fun update(id: Long, insuranceCreateDTO: InsuranceCreateDTO): InsuranceDTO? {
         val existingInsurance = insuranceRepository.findById(id).orElse(null) ?: return null
+        val rental = rentalRepository.findById(insuranceCreateDTO.rentalId)
+            .orElseThrow { IllegalArgumentException("Rental not found") }
+
         val updatedInsurance = existingInsurance.copy(
-            type = insurance.type,
-            cost = insurance.cost,
-            rental = insurance.rental // Assuming rental may change
+            type = insuranceCreateDTO.type,
+            cost = insuranceCreateDTO.cost,
+            rental = rental
         )
-        return insuranceRepository.save(updatedInsurance)
+        val savedInsurance = insuranceRepository.save(updatedInsurance)
+        return insuranceMapper.toInsuranceDTO(savedInsurance)
     }
 
     fun deleteById(id: Long) = insuranceRepository.deleteById(id)
