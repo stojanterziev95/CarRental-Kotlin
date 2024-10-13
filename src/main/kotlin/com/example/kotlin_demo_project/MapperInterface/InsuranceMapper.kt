@@ -14,6 +14,6 @@ interface InsuranceMapper {
     @Mapping(source = "rental.id", target = "rentalId") // Maps from Insurance to InsuranceDTO
     fun toInsuranceDTO(insurance: Insurance): InsuranceDTO
 
-    @Mapping(source = "rentalId", target = "rental.id") // Maps from InsuranceCreateDTO to Insurance
+    @Mapping(source = "insuranceDTO.rentalId", target = "rental.id") // Correct mapping reference
     fun toInsurance(insuranceDTO: InsuranceCreateDTO, rental: Rental): Insurance
 }
