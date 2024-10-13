@@ -41,8 +41,16 @@ class AuthController(
 
     @PostMapping("/register")
     fun register(@RequestBody user: User): ResponseEntity<String> {
-        // Perform necessary checks, e.g., if username already exists
-        userRepository.save(user.copy(password = passwordEncoder.encode(user.password)))
+        // Check if the username already exists
+        if (userRepository.findByUsername(user.username) != null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body("Username is already taken!")
+        }
+
+        // Encode the user's password before saving
+        val encodedUser = user.copy(password = passwordEncoder.encode(user.password))
+        userRepository.save(encodedUser)
+
         return ResponseEntity.ok("User registered successfully!")
     }
 }
